@@ -31,12 +31,56 @@ function Game() {
   }
 
   function doAIMove() {
-    let availableMoves = squares
-      .map((sq, idx) => (sq === null ? idx : null))
-      .filter((val) => val !== null);
-    let aiMove =
-      availableMoves[Math.floor(Math.random() * availableMoves.length)];
-    setTimeout(() => handleSquareClick(aiMove), 1000);
+    const bestMove = findBestMove(squares);
+    setTimeout(() => handleSquareClick(bestMove), 1000);
+  }
+
+  function findBestMove(squares) {
+    let bestValue = -Infinity;
+    let bestMove = -1;
+
+    for (let i = 0; i < squares.length; i++) {
+      if (squares[i] === null) {
+        squares[i] = "O";
+        let moveValue = minimax(squares, 0, false);
+        squares[i] = null;
+
+        if (moveValue > bestValue) {
+          bestMove = i;
+          bestValue = moveValue;
+        }
+      }
+    }
+    return bestMove;
+  }
+
+  function minimax(squares, depth, isMaximizing) {
+    const winner = calculateWinner(squares);
+    if (winner === "O") return 10 - depth;
+    if (winner === "X") return depth - 10;
+    if (squares.every((square) => square !== null)) return 0;
+
+    if (isMaximizing) {
+      let bestValue = -Infinity;
+      for (let i = 0; i < squares.length; i++) {
+        if (squares[i] === null) {
+          squares[i] = "O";
+          bestValue = Math.max(bestValue, minimax(squares, depth + 1, false));
+          squares[i] = null;
+        }
+      }
+      return bestValue;
+    } else {
+      let bestValue = Infinity;
+      for (let i = 0; i < squares.length; i++) {
+        if (squares[i] === null) {
+          squares[i] = "X";
+          bestValue = Math.min(bestValue, minimax(squares, depth + 1, true));
+          squares[i] = null; 
+        }
+      }
+      return bestValue;
+    }
   }
 
   return (
